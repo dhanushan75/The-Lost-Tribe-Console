@@ -16,4 +16,6 @@ public interface ClientExpenseDao extends JpaRepository<ClientExpenseEntity, Lon
 
     @Query(value = QueryConstants.GET_CASHIN_CASHOUT_FOR_CLIENT_IDS, nativeQuery = true)
     public List<CashInCashOutData> getTotalCashInCashOutFromClientIdList(@RequestParam("pClientIdSet") Set<Long> pClientIdSet);
+
+    List<ClientExpenseEntity> findByClientId(Long pClientId);
 }

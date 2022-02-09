@@ -6,6 +6,7 @@ import com.tlt.console.dao.ClientExpenseDao;
 import com.tlt.console.dao.UnitsDao;
 import com.tlt.console.data.*;
 import com.tlt.console.entity.ClientDetailEntity;
+import com.tlt.console.entity.ClientExpenseEntity;
 import com.tlt.console.service.BookingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -70,5 +71,22 @@ public class BookingServiceImpl implements BookingService {
         }
 
         return summaryDataList;
+    }
+
+    public List<ExpenseData> getExpensesOfClient(Long pClientId) throws Exception{
+        List<ClientExpenseEntity> entityList = mClientExpenseDao.findByClientId(pClientId);
+        List<ExpenseData> expanseDataList = new ArrayList<>();
+
+        for (ClientExpenseEntity entity : entityList){
+            ExpenseData data = new ExpenseData();
+            data.setService(entity.getServiceId().getName());
+            data.setCashIn(entity.getCashIn());
+            data.setCashOut(entity.getCashOut());
+            data.setDescription(entity.getDescription());
+            data.setUpdateDate(entity.getUpdateDate());
+            data.setUpdateUser(entity.getUpdateUser());
+            expanseDataList.add(data);
+        }
+        return expanseDataList;
     }
 }

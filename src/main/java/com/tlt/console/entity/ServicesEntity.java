@@ -18,7 +18,7 @@ public class ServicesEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "client_id")
+    @Column(name = "service_id")
     private Long service_id;
 
     @Column(name = "name")

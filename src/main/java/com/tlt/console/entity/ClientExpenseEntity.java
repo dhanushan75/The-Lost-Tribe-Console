@@ -21,13 +21,12 @@ public class ClientExpenseEntity {
     @Column(name = "expense_id")
     private Long expenseId;
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "service_id")
     private ServicesEntity serviceId;
 
-    @ManyToOne
-    @JoinColumn(name = "client_id")
-    private ClientDetailEntity clientId;
+    @Column(name = "client_id")
+    private Long clientId;
 
     @Column(name = "cash_in")
     private Double cashIn;

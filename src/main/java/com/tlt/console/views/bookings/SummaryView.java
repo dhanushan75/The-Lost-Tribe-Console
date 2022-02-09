@@ -9,6 +9,7 @@ import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
+import com.vaadin.flow.component.html.Footer;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -26,6 +27,10 @@ public class SummaryView extends VerticalLayout {
 
     private Button mMenuButton;
 
+    private Button mExpenseWindowButton;
+
+    private SummaryData mSummaryData;
+
     public SummaryView(BookingService pBookingService) {
         mBookingService = pBookingService;
         createControls();
@@ -40,13 +45,22 @@ public class SummaryView extends VerticalLayout {
         mMenuButton = new Button("Show/Hide Columns");
         mMenuButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
 
+        mExpenseWindowButton = new Button("Show Detailed Expense");
+        mExpenseWindowButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        mExpenseWindowButton.setEnabled(false);
+
         setValueToGrid(null);
 
         mGrid.addSelectionListener(selection -> {
             Optional<SummaryData> optionalSummaryData = selection.getFirstSelectedItem();
             if (optionalSummaryData.isPresent()) {
-                // System.out.printf("Selected person: %s%n", optionalPerson.get().getFullName());
+                mExpenseWindowButton.setEnabled(true);
+                mSummaryData = optionalSummaryData.get();
             }
+        });
+
+        mExpenseWindowButton.addClickListener(clickEvent -> {
+            ExpenseDialog expenseDialog = new ExpenseDialog(mBookingService, mSummaryData);
         });
 
         Span title = new Span("Summary");
@@ -56,7 +70,12 @@ public class SummaryView extends VerticalLayout {
         headerLayout.setFlexGrow(1, title);
         headerLayout.setWidthFull();
 
-        add(headerLayout, mGrid);
+        HorizontalLayout footerLayout = new HorizontalLayout(mExpenseWindowButton);
+        footerLayout.setAlignItems(Alignment.START);
+        footerLayout.setWidthFull();
+        Footer footer = new Footer(footerLayout);
+
+        add(headerLayout, mGrid, footer);
     }
 
     private void setValueToGrid(Date pFromDate) {
@@ -66,18 +85,18 @@ public class SummaryView extends VerticalLayout {
 
             mGrid.setItems(summaryDataList);
 
-            mGrid.addColumn(SummaryData::getName).setHeader("Name");
-            mGrid.addColumn(SummaryData::getRoom).setHeader("Room");
-            mGrid.addColumn(SummaryData::getUnit).setHeader("Unit");
-            mGrid.addColumn(SummaryData::getCheckIn).setHeader("Check In");
-            mGrid.addColumn(SummaryData::getCheckout).setHeader("Check Out");
-            mGrid.addColumn(SummaryData::getTotalCashIn).setHeader("Total Cash In");
-            mGrid.addColumn(SummaryData::getTotalCashOut).setHeader("Total Cash Out");
+            mGrid.addColumn(SummaryData::getName).setHeader("Name").setResizable(true);
+            mGrid.addColumn(SummaryData::getRoom).setHeader("Room").setResizable(true);
+            mGrid.addColumn(SummaryData::getUnit).setHeader("Unit").setResizable(true);
+            mGrid.addColumn(SummaryData::getCheckIn).setHeader("Check In").setResizable(true);
+            mGrid.addColumn(SummaryData::getCheckout).setHeader("Check Out").setResizable(true);
+            mGrid.addColumn(SummaryData::getTotalCashIn).setHeader("Total Cash In").setResizable(true);
+            mGrid.addColumn(SummaryData::getTotalCashOut).setHeader("Total Cash Out").setResizable(true);
 
-            Grid.Column<SummaryData> idColumn = mGrid.addColumn(SummaryData::getClientId).setHeader("Id");
-            Grid.Column<SummaryData> bookedDateColumn = mGrid.addColumn(SummaryData::getBookedDate).setHeader("Booked Date");
-            Grid.Column<SummaryData> idProofColumn = mGrid.addColumn(SummaryData::getIdProof).setHeader("Id Proof Type");
-            Grid.Column<SummaryData> idProofNumberColumn = mGrid.addColumn(SummaryData::getIdProofNumber).setHeader("Id Proof number");
+            Grid.Column<SummaryData> idColumn = mGrid.addColumn(SummaryData::getClientId).setHeader("Id").setResizable(true);
+            Grid.Column<SummaryData> bookedDateColumn = mGrid.addColumn(SummaryData::getBookedDate).setHeader("Booked Date").setResizable(true);
+            Grid.Column<SummaryData> idProofColumn = mGrid.addColumn(SummaryData::getIdProof).setHeader("Id Proof Type").setResizable(true);
+            Grid.Column<SummaryData> idProofNumberColumn = mGrid.addColumn(SummaryData::getIdProofNumber).setHeader("Id Proof number").setResizable(true);
 
             ColumnToggleContextMenu columnToggleContextMenu = new ColumnToggleContextMenu(
                     mMenuButton);
