@@ -60,7 +60,7 @@ public class SummaryView extends VerticalLayout {
         });
 
         mExpenseWindowButton.addClickListener(clickEvent -> {
-            ExpenseDialog expenseDialog = new ExpenseDialog(mBookingService, mSummaryData);
+            ExpenseDialog expenseDialog = new ExpenseDialog(mBookingService, mSummaryData, this);
         });
 
         Span title = new Span("Summary");
@@ -81,6 +81,7 @@ public class SummaryView extends VerticalLayout {
     private void setValueToGrid(Date pFromDate) {
 
         try {
+            mGrid.removeAllColumns();
             List<SummaryData> summaryDataList = mBookingService.getSummaryDataForGrid(pFromDate);
 
             mGrid.setItems(summaryDataList);

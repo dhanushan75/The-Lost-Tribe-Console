@@ -19,7 +19,7 @@ public class ServicesEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "service_id")
-    private Long service_id;
+    private Long serviceId;
 
     @Column(name = "name")
     private String name;

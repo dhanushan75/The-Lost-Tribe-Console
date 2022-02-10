@@ -6,4 +6,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ServicesDao extends JpaRepository<ServicesEntity, Long> {
+
+    public ServicesEntity findByName(String pServiceType);
 }

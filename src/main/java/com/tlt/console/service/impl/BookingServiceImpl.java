@@ -1,12 +1,10 @@
 package com.tlt.console.service.impl;
 
-import com.tlt.console.dao.ClientCheckInCalendarDao;
-import com.tlt.console.dao.ClientDetailDao;
-import com.tlt.console.dao.ClientExpenseDao;
-import com.tlt.console.dao.UnitsDao;
+import com.tlt.console.dao.*;
 import com.tlt.console.data.*;
 import com.tlt.console.entity.ClientDetailEntity;
 import com.tlt.console.entity.ClientExpenseEntity;
+import com.tlt.console.entity.ServicesEntity;
 import com.tlt.console.service.BookingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,6 +28,9 @@ public class BookingServiceImpl implements BookingService {
 
     @Autowired
     private ClientDetailDao mClientDetailDao;
+
+    @Autowired
+    private ServicesDao mServicesDao;
 
     public List<SummaryData> getSummaryDataForGrid(Date pFromDate) throws Exception {
         List<SummaryData> summaryDataList = new ArrayList<>();
@@ -73,11 +74,11 @@ public class BookingServiceImpl implements BookingService {
         return summaryDataList;
     }
 
-    public List<ExpenseData> getExpensesOfClient(Long pClientId) throws Exception{
+    public List<ExpenseData> getExpensesOfClient(Long pClientId) throws Exception {
         List<ClientExpenseEntity> entityList = mClientExpenseDao.findByClientId(pClientId);
         List<ExpenseData> expanseDataList = new ArrayList<>();
 
-        for (ClientExpenseEntity entity : entityList){
+        for (ClientExpenseEntity entity : entityList) {
             ExpenseData data = new ExpenseData();
             data.setService(entity.getServiceId().getName());
             data.setCashIn(entity.getCashIn());
@@ -88,5 +89,30 @@ public class BookingServiceImpl implements BookingService {
             expanseDataList.add(data);
         }
         return expanseDataList;
+    }
+
+    public List<String> getServiceList() throws Exception {
+        List<String> serviceList = new ArrayList<>();
+        List<ServicesEntity> serviceEntiyList = mServicesDao.findAll();
+        serviceEntiyList.stream().forEach(servicesEntity -> serviceList.add(servicesEntity.getName()));
+        return serviceList;
+    }
+
+    public void saveExpenseData(ClientExpenseEntity pExpenseEntity, String pServiceType) throws Exception {
+        ServicesEntity servicesEntity = mServicesDao.findByName(pServiceType.toUpperCase());
+
+        if(servicesEntity == null){
+            servicesEntity = new ServicesEntity();
+            servicesEntity.setName(pServiceType.toUpperCase());
+            servicesEntity.setDescription(pServiceType.toUpperCase());
+            servicesEntity.setActive("Y");
+            servicesEntity.setUpdateDate(new Date());
+            servicesEntity.setUpdateUser("1");
+
+            servicesEntity = mServicesDao.saveAndFlush(servicesEntity);
+        }
+
+        pExpenseEntity.setServiceId(servicesEntity);
+        mClientExpenseDao.save(pExpenseEntity);
     }
 }

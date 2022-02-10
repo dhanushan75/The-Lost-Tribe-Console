@@ -51,7 +51,7 @@ CREATE TABLE tlt_console.client_expense (
 `client_id` bigint NOT NULL ,
 `cash_in` bigint ,
 `cash_out` bigint ,
-`description` varchar(500) ,
+`description` varchar(5000) ,
 `update_date` datetime NOT NULL default NOW(),
 `update_user` bigint NOT NULL default 1,
 PRIMARY KEY (`expense_id`),

@@ -15,4 +15,8 @@ public interface BookingService {
 
     public List<ExpenseData> getExpensesOfClient(Long pClientId) throws Exception;
 
+    public List<String> getServiceList() throws Exception;
+
+    public void saveExpenseData(ClientExpenseEntity pExpenseEntity, String pServiceType) throws Exception;
+
 }
