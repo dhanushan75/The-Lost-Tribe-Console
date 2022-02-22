@@ -2,6 +2,7 @@ package com.tlt.console.views.bookings;
 
 import com.tlt.console.data.SummaryData;
 import com.tlt.console.service.BookingService;
+import com.tlt.console.views.MainLayout;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -14,11 +15,18 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.RouteAlias;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+@PageTitle("Summary")
+@Route(value = "Summary", layout = MainLayout.class)
+@RouteAlias(value = "", layout = MainLayout.class)
 public class SummaryView extends VerticalLayout {
 
     private BookingService mBookingService;
@@ -31,7 +39,7 @@ public class SummaryView extends VerticalLayout {
 
     private SummaryData mSummaryData;
 
-    public SummaryView(BookingService pBookingService) {
+    public SummaryView(@Autowired BookingService pBookingService) {
         mBookingService = pBookingService;
         createControls();
     }
@@ -78,7 +86,7 @@ public class SummaryView extends VerticalLayout {
         add(headerLayout, mGrid, footer);
     }
 
-    private void setValueToGrid(Date pFromDate) {
+    public void setValueToGrid(Date pFromDate) {
 
         try {
             mGrid.removeAllColumns();

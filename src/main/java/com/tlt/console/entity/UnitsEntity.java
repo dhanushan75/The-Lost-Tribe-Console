@@ -28,7 +28,7 @@ public class UnitsEntity {
     private String description;
 
     @Column(name = "parent_unit_id")
-    private Long parent_unit_id;
+    private Long parentUnitId;
 
     @Column(name = "unit_type")
     private String unitType;

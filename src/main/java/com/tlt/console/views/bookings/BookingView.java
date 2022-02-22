@@ -12,9 +12,9 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import org.springframework.beans.factory.annotation.Autowired;
 
-@PageTitle("Bookings")
-@Route(value = "bookings", layout = MainLayout.class)
-@RouteAlias(value = "", layout = MainLayout.class)
+//@PageTitle("Bookings")
+//@Route(value = "bookings", layout = MainLayout.class)
+//@RouteAlias(value = "", layout = MainLayout.class)
 public class BookingView extends VerticalLayout {
 
     private HorizontalLayout mContent;

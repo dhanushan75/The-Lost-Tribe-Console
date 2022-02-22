@@ -120,6 +120,7 @@ public class ExpenseDialog extends Dialog {
         expenseEntity.setUpdateUser("1");
         mBookingService.saveExpenseData(expenseEntity, serviceType);
         setValueToGrid();
+        mSummaryView.setValueToGrid(null);
     }
 
 }

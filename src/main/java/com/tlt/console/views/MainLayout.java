@@ -2,6 +2,8 @@ package com.tlt.console.views;
 
 
 import com.tlt.console.views.bookings.BookingView;
+import com.tlt.console.views.bookings.MakeABookingView;
+import com.tlt.console.views.bookings.SummaryView;
 import com.tlt.console.views.inventory.InventoryView;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.applayout.AppLayout;
@@ -150,7 +152,9 @@ public class MainLayout extends AppLayout {
 
     private MenuItemInfo[] createMenuItems() {
         return new MenuItemInfo[]{ //
-                new MenuItemInfo("Bookings", "la la-globe", BookingView.class), //
+                new MenuItemInfo("Summary", "la la-globe", SummaryView.class), //
+
+                new MenuItemInfo("Bookings", "la la-globe", MakeABookingView.class), //
 
                 new MenuItemInfo("Inventory", "la la-file", InventoryView.class), //
 

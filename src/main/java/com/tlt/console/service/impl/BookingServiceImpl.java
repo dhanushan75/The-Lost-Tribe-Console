@@ -2,9 +2,7 @@ package com.tlt.console.service.impl;
 
 import com.tlt.console.dao.*;
 import com.tlt.console.data.*;
-import com.tlt.console.entity.ClientDetailEntity;
-import com.tlt.console.entity.ClientExpenseEntity;
-import com.tlt.console.entity.ServicesEntity;
+import com.tlt.console.entity.*;
 import com.tlt.console.service.BookingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -114,5 +112,21 @@ public class BookingServiceImpl implements BookingService {
 
         pExpenseEntity.setServiceId(servicesEntity);
         mClientExpenseDao.save(pExpenseEntity);
+    }
+
+    public List<UnitsEntity> getParentUnits() throws Exception{
+        return mUnitDao.findByUnitType("UNIT");
+    }
+
+    public List<UnitsEntity> getSubUnits(Long parentUnitId) throws Exception{
+        return mUnitDao.findByParentUnitId(parentUnitId);
+    }
+
+    public List<ClientCheckInCalendarEntity> getCalendarEventsByUnitId(Long unitId) throws Exception{
+        if(unitId != null){
+            return mClientCheckInCalendarDao.findByUnitId_UnitId(unitId);
+        }else{
+            return mClientCheckInCalendarDao.findAll();
+        }
     }
 }
