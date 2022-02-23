@@ -1,15 +1,12 @@
 package com.tlt.console.views.bookings;
 
 import com.tlt.console.service.BookingService;
-import com.tlt.console.views.MainLayout;
+import com.tlt.console.views.summary.SummaryView;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.tabs.TabsVariant;
-import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.router.Route;
-import com.vaadin.flow.router.RouteAlias;
 import org.springframework.beans.factory.annotation.Autowired;
 
 //@PageTitle("Bookings")

@@ -8,6 +8,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.html.Footer;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -40,6 +41,8 @@ public class MakeABookingView extends VerticalLayout {
 
     private HashMap<Long, String> parentIdNameMap;
 
+    private List<String> pColourList;
+
     public MakeABookingView(@Autowired BookingService pBookingService) {
         mBookingService = pBookingService;
         createControls();
@@ -50,6 +53,17 @@ public class MakeABookingView extends VerticalLayout {
         try {
 
             this.setSizeFull();
+
+            pColourList = new ArrayList<>();
+            pColourList.add("#ff3333");
+            pColourList.add("#25383C");
+            pColourList.add("#ADD8E6");
+            pColourList.add("#800080");
+            pColourList.add("#FFA500");
+            pColourList.add("#646D7E");
+            pColourList.add("#A52A2A");
+            pColourList.add("#808080");
+            pColourList.add("#7FFD4");
 
             ComboBox.ItemFilter<UnitsEntity> filter = (unitsEntity, filterString) -> (unitsEntity.getName().toLowerCase().startsWith(filterString.toLowerCase()));
 
@@ -89,9 +103,6 @@ public class MakeABookingView extends VerticalLayout {
 
             FormLayout formLayout = new FormLayout();
             formLayout.add(mMainUnitCombo, mSubUnitCombo, buttonLayout);
-//            formLayout.addFormItem(mMainUnitCombo, "Unit");
-//            formLayout.addFormItem(mSubUnitCombo, "Room/Dorm");
-//            formLayout.add(buttonLayout);
             formLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 3));
             formLayout.setWidthFull();
 
@@ -110,8 +121,20 @@ public class MakeABookingView extends VerticalLayout {
                 System.out.println("\n\n\n time slot \n\n\n");
             });
 
-            add(formLayout);
-            add(calendar);
+            Button mAddCustomer = new Button("Add new Customer");
+            mAddCustomer.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+            mAddCustomer.setEnabled(true);
+
+            mAddCustomer.addClickListener(clickEvent -> {
+                AddNewCustomerDialog addNewCustomerDialog = new AddNewCustomerDialog(mBookingService, this);
+            });
+
+            HorizontalLayout footerLayout = new HorizontalLayout(mAddCustomer);
+            footerLayout.setAlignItems(Alignment.START);
+            footerLayout.setWidthFull();
+            Footer footer = new Footer(footerLayout);
+
+            add(formLayout, calendar, mAddCustomer);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -136,9 +159,13 @@ public class MakeABookingView extends VerticalLayout {
 
     }
 
-    private void getCalendarEvents() {
+    public void getCalendarEvents() {
 
         try {
+
+            HashMap<String, String> clientColourMap = new HashMap<>();
+            Random rand = new Random(); //instance of random class
+            int upperbound = pColourList.size();
 
             calendar.removeAllEntries();
             Long unitId = null;
@@ -151,29 +178,23 @@ public class MakeABookingView extends VerticalLayout {
 
             for (ClientCheckInCalendarEntity entity : entityList) {
 
+                int intRandom = rand.nextInt(upperbound);
+
                 // Create a initial sample entry
                 Entry entry = new Entry();
-                entry.setTitle(entity.getClientId().getName() + " : " + parentIdNameMap.get(entity.getUnitId().getParentUnitId()) + " - " + entity.getUnitId().getName());
-//                entry.setColor("#ff3333");
-                entry.setColor("dodgerblue");
-                //entry.setRenderingMode(Entry.RenderingMode.BACKGROUND);
+                String title = entity.getClientId().getName() + " : " + parentIdNameMap.get(entity.getUnitId().getParentUnitId()) + " - " + entity.getUnitId().getName();
+                entry.setTitle(title);
 
-                //the given times will be interpreted as utc based - useful when the times are fetched from your database
-//        entry.setStart(LocalDate.now().withDayOfMonth(3).atTime(10, 0));
-//        entry.setEnd(entry.getStart().plusHours(2));
-
-//                Calendar c = Calendar.getInstance();
-//                c.setTime(new Date());
-//                c.set(Calendar.DAY_OF_MONTH, c.getActualMaximum(Calendar.DAY_OF_MONTH));
-//                TimeZone tz = c.getTimeZone();
-//                ZoneId zid = tz == null ? ZoneId.systemDefault() : tz.toZoneId();
-//
-//                entry.setStart(LocalDateTime.now().withDayOfMonth(1));
-//                entry.setEnd(LocalDateTime.ofInstant(c.toInstant(), zid));
+                if (clientColourMap.get(title) == null) {
+                    String colour = pColourList.get(intRandom);
+                    entry.setColor(colour);
+                    clientColourMap.put(title, colour);
+                } else {
+                    entry.setColor(clientColourMap.get(title));
+                }
 
                 Calendar c = Calendar.getInstance();
                 c.setTime(entity.getBookedDate());
-                //c.set(Calendar.DAY_OF_MONTH, c.getActualMaximum(Calendar.DAY_OF_MONTH));
                 TimeZone tz = c.getTimeZone();
                 ZoneId zid = tz == null ? ZoneId.systemDefault() : tz.toZoneId();
 

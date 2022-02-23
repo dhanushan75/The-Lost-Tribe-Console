@@ -7,8 +7,6 @@ import com.tlt.console.service.BookingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -33,12 +31,14 @@ public class BookingServiceImpl implements BookingService {
     public List<SummaryData> getSummaryDataForGrid(Date pFromDate) throws Exception {
         List<SummaryData> summaryDataList = new ArrayList<>();
 
+        Set<Long> pClientIdList = null;
         if (pFromDate == null) {
-            LocalDate fromDate = LocalDate.now().withDayOfMonth(1);
-            pFromDate = Date.from(fromDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+//            LocalDate fromDate = LocalDate.now().withDayOfMonth(1);
+//            pFromDate = Date.from(fromDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            pClientIdList = mClientDetailDao.getClientIdList();
+        }else{
+            pClientIdList = mClientCheckInCalendarDao.getClientIdListForCurrentMonth(pFromDate);
         }
-
-        Set<Long> pClientIdList = mClientCheckInCalendarDao.getClientIdListForCurrentMonth(pFromDate);
 
         List<ClientCheckInCheckoutData> checkInCheckoutDataList = mClientCheckInCalendarDao.getCheckInCheckOutDateFromClientIdList(pClientIdList);
 
@@ -60,8 +60,11 @@ public class BookingServiceImpl implements BookingService {
             summaryData.setUnit(unitData.getUnit());
             summaryData.setRoom(unitData.getRoom());
             summaryData.setBookedDate(entity.getBookedDate());
-            summaryData.setTotalCashIn(cashInCashOutData.getCash_in());
-            summaryData.setTotalCashOut(cashInCashOutData.getCash_out());
+
+            if(cashInCashOutData != null) {
+                summaryData.setTotalCashIn(cashInCashOutData.getCash_in());
+                summaryData.setTotalCashOut(cashInCashOutData.getCash_out());
+            }
             summaryData.setCheckIn(data.getCheckin());
             summaryData.setCheckout(data.getCheckout());
             summaryData.setIdProof(entity.getIdProofType());
@@ -128,5 +131,17 @@ public class BookingServiceImpl implements BookingService {
         }else{
             return mClientCheckInCalendarDao.findAll();
         }
+    }
+
+    public List<String> getIdProofTypeList() throws Exception{
+        return mClientDetailDao.getDistinctIdProofType();
+    }
+
+    public ClientDetailEntity saveClientDetail(ClientDetailEntity entity){
+       return mClientDetailDao.saveAndFlush(entity);
+    }
+
+    public void saveClientCheckInCalendar(ClientCheckInCalendarEntity checkinEntity) throws Exception{
+        mClientCheckInCalendarDao.save(checkinEntity);
     }
 }

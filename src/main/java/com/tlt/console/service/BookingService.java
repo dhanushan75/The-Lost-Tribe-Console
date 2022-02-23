@@ -3,6 +3,7 @@ package com.tlt.console.service;
 import com.tlt.console.data.ExpenseData;
 import com.tlt.console.data.SummaryData;
 import com.tlt.console.entity.ClientCheckInCalendarEntity;
+import com.tlt.console.entity.ClientDetailEntity;
 import com.tlt.console.entity.ClientExpenseEntity;
 import com.tlt.console.entity.UnitsEntity;
 import org.springframework.stereotype.Service;
@@ -26,4 +27,10 @@ public interface BookingService {
     public List<UnitsEntity> getSubUnits(Long parentUnitId) throws Exception;
 
     public List<ClientCheckInCalendarEntity> getCalendarEventsByUnitId(Long unitId) throws Exception;
+
+    public List<String> getIdProofTypeList() throws Exception;
+
+    public ClientDetailEntity saveClientDetail(ClientDetailEntity entity);
+
+    public void saveClientCheckInCalendar(ClientCheckInCalendarEntity checkinEntity) throws Exception;
 }

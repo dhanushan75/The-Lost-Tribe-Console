@@ -1,4 +1,4 @@
-package com.tlt.console.views.bookings;
+package com.tlt.console.views.summary;
 
 import com.tlt.console.entity.ClientExpenseEntity;
 import com.tlt.console.service.BookingService;
@@ -10,7 +10,6 @@ import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextArea;
-import com.vaadin.flow.component.textfield.TextField;
 
 import java.util.List;
 
