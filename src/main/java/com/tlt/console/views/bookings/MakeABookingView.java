@@ -4,24 +4,32 @@ import com.tlt.console.entity.ClientCheckInCalendarEntity;
 import com.tlt.console.entity.UnitsEntity;
 import com.tlt.console.service.BookingService;
 import com.tlt.console.views.MainLayout;
+import com.tlt.console.views.MyNotification;
+import com.vaadin.flow.component.HasText;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.html.Footer;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.menubar.MenuBar;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.vaadin.stefan.fullcalendar.Entry;
-import org.vaadin.stefan.fullcalendar.FullCalendar;
-import org.vaadin.stefan.fullcalendar.FullCalendarBuilder;
+import org.vaadin.stefan.fullcalendar.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @PageTitle("Bookings")
@@ -43,6 +51,12 @@ public class MakeABookingView extends VerticalLayout {
 
     private List<String> pColourList;
 
+    private Button buttonDatePicker;
+
+    private MenuBar mMenuBar;
+
+    private CalendarView selectedView;
+
     public MakeABookingView(@Autowired BookingService pBookingService) {
         mBookingService = pBookingService;
         createControls();
@@ -53,6 +67,8 @@ public class MakeABookingView extends VerticalLayout {
         try {
 
             this.setSizeFull();
+
+            selectedView = CalendarViewImpl.DAY_GRID_MONTH;
 
             pColourList = new ArrayList<>();
             pColourList.add("#ff3333");
@@ -67,10 +83,10 @@ public class MakeABookingView extends VerticalLayout {
 
             ComboBox.ItemFilter<UnitsEntity> filter = (unitsEntity, filterString) -> (unitsEntity.getName().toLowerCase().startsWith(filterString.toLowerCase()));
 
-            mSubUnitCombo = new ComboBox<>();
+            mSubUnitCombo = new ComboBox<>("Room / Dorm");
             mSubUnitCombo.setAllowCustomValue(false);
 
-            mMainUnitCombo = new ComboBox<>();
+            mMainUnitCombo = new ComboBox<>("Unit");
             mMainUnitCombo.setAllowCustomValue(false);
             parentUnitList = mBookingService.getParentUnits();
             mMainUnitCombo.setItems(filter, parentUnitList);
@@ -118,7 +134,11 @@ public class MakeABookingView extends VerticalLayout {
 //        calendar.setWidth("40%");
 
             calendar.addTimeslotClickedListener(event -> {
-                System.out.println("\n\n\n time slot \n\n\n");
+                if (mMainUnitCombo.getValue() != null && mSubUnitCombo.getValue() != null && event != null) {
+                    new MyNotification().error("Room already Booked for the day!!");
+                } else {
+
+                }
             });
 
             Button mAddCustomer = new Button("Add new Customer");
@@ -129,12 +149,22 @@ public class MakeABookingView extends VerticalLayout {
                 AddNewCustomerDialog addNewCustomerDialog = new AddNewCustomerDialog(mBookingService, this);
             });
 
-            HorizontalLayout footerLayout = new HorizontalLayout(mAddCustomer);
-            footerLayout.setAlignItems(Alignment.START);
-            footerLayout.setWidthFull();
-            Footer footer = new Footer(footerLayout);
+            mMenuBar = new MenuBar();
+            mMenuBar.setWidthFull();
 
-            add(formLayout, calendar, mAddCustomer);
+            FormLayout toolBar = new FormLayout();
+            toolBar.add(new HorizontalLayout(), mMenuBar, new HorizontalLayout());
+            toolBar.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 3));
+            toolBar.setWidthFull();
+
+            getCalendarEvents();
+            initDateItems();
+
+            add(formLayout);
+            add(toolBar);
+            setHorizontalComponentAlignment(Alignment.CENTER, toolBar);
+            add(calendar);
+            add(mAddCustomer);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -169,12 +199,17 @@ public class MakeABookingView extends VerticalLayout {
 
             calendar.removeAllEntries();
             Long unitId = null;
+            Long parentUnitId = null;
 
             if (mSubUnitCombo.getValue() != null) {
                 unitId = mSubUnitCombo.getValue().getUnitId();
             }
 
-            List<ClientCheckInCalendarEntity> entityList = mBookingService.getCalendarEventsByUnitId(unitId);
+            if (mMainUnitCombo.getValue() != null) {
+                parentUnitId = mMainUnitCombo.getValue().getUnitId();
+            }
+
+            List<ClientCheckInCalendarEntity> entityList = mBookingService.getCalendarEventsByUnitId(unitId, parentUnitId);
 
             for (ClientCheckInCalendarEntity entity : entityList) {
 
@@ -207,6 +242,88 @@ public class MakeABookingView extends VerticalLayout {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private void initDateItems() {
+        mMenuBar.addItem(VaadinIcon.ANGLE_LEFT.create(), e -> calendar.previous());
+
+        // simulate the date picker light that we can use in polymer
+        DatePicker gotoDate = new DatePicker();
+        gotoDate.addValueChangeListener(event1 -> calendar.gotoDate(event1.getValue()));
+        gotoDate.getElement().getStyle().set("visibility", "hidden");
+        gotoDate.getElement().getStyle().set("position", "fixed");
+        gotoDate.setWidth("0px");
+        gotoDate.setHeight("0px");
+        gotoDate.setWeekNumbersVisible(true);
+        buttonDatePicker = new Button(VaadinIcon.CALENDAR.create());
+        buttonDatePicker.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
+        buttonDatePicker.getElement().appendChild(gotoDate.getElement());
+        buttonDatePicker.addClickListener(event -> gotoDate.open());
+        buttonDatePicker.setWidthFull();
+        mMenuBar.addItem(buttonDatePicker);
+        mMenuBar.addItem(VaadinIcon.ANGLE_RIGHT.create(), e -> calendar.next());
+        mMenuBar.addItem("Today", e -> calendar.today());
+    }
+
+    public void updateInterval(LocalDate intervalStart) {
+        if (buttonDatePicker != null && selectedView != null) {
+            updateIntervalLabel(buttonDatePicker, selectedView, intervalStart);
+        }
+    }
+
+    void updateIntervalLabel(HasText intervalLabel, CalendarView view, LocalDate intervalStart) {
+        String text = "--";
+        Locale locale = calendar.getLocale();
+
+        if (view instanceof CalendarViewImpl) {
+            switch ((CalendarViewImpl) view) {
+                default:
+                case DAY_GRID_MONTH:
+                case LIST_MONTH:
+                    text = intervalStart.format(DateTimeFormatter.ofPattern("MMMM yyyy").withLocale(locale));
+                    break;
+                case TIME_GRID_DAY:
+                case DAY_GRID_DAY:
+                case LIST_DAY:
+                    text = intervalStart.format(DateTimeFormatter.ofPattern("dd.MM.yyyy").withLocale(locale));
+                    break;
+                case TIME_GRID_WEEK:
+                case DAY_GRID_WEEK:
+                case LIST_WEEK:
+                    text = intervalStart.format(DateTimeFormatter.ofPattern("dd.MM.yy").withLocale(locale)) + " - " + intervalStart.plusDays(6).format(DateTimeFormatter.ofPattern("dd.MM.yy").withLocale(locale)) + " (cw " + intervalStart.format(DateTimeFormatter.ofPattern("ww").withLocale(locale)) + ")";
+                    break;
+                case LIST_YEAR:
+                    text = intervalStart.format(DateTimeFormatter.ofPattern("yyyy").withLocale(locale));
+                    break;
+            }
+        } else if (view instanceof SchedulerView) {
+            switch ((SchedulerView) view) {
+                case TIMELINE_DAY:
+                case RESOURCE_TIMELINE_DAY:
+                case RESOURCE_TIME_GRID_DAY:
+                    text = intervalStart.format(DateTimeFormatter.ofPattern("dd.MM.yyyy").withLocale(locale));
+                    break;
+                case TIMELINE_WEEK:
+                case RESOURCE_TIMELINE_WEEK:
+                case RESOURCE_TIME_GRID_WEEK:
+                    text = intervalStart.format(DateTimeFormatter.ofPattern("dd.MM.yy").withLocale(locale)) + " - " + intervalStart.plusDays(6).format(DateTimeFormatter.ofPattern("dd.MM.yy").withLocale(locale)) + " (cw " + intervalStart.format(DateTimeFormatter.ofPattern("ww").withLocale(locale)) + ")";
+                    break;
+                case TIMELINE_MONTH:
+                case RESOURCE_TIMELINE_MONTH:
+                    text = intervalStart.format(DateTimeFormatter.ofPattern("MMMM yyyy").withLocale(locale));
+                    break;
+                case TIMELINE_YEAR:
+                case RESOURCE_TIMELINE_YEAR:
+                    text = intervalStart.format(DateTimeFormatter.ofPattern("yyyy").withLocale(locale));
+                    break;
+            }
+        } else {
+            String pattern = view != null && view.getDateTimeFormatPattern() != null ? view.getDateTimeFormatPattern() : "MMMM yyyy";
+            text = intervalStart.format(DateTimeFormatter.ofPattern(pattern).withLocale(locale));
+
+        }
+
+        intervalLabel.setText(text);
     }
 
 }

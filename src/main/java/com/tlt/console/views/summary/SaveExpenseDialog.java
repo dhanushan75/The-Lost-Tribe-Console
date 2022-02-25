@@ -2,15 +2,19 @@ package com.tlt.console.views.summary;
 
 import com.tlt.console.entity.ClientExpenseEntity;
 import com.tlt.console.service.BookingService;
+import com.tlt.console.views.MyNotification;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextArea;
 
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
 
 public class SaveExpenseDialog extends Dialog {
@@ -31,6 +35,8 @@ public class SaveExpenseDialog extends Dialog {
 
     private ExpenseDialog mExpenseDialog;
 
+    private DatePicker mUpdateDate;
+
     public SaveExpenseDialog(BookingService pBookingService, ExpenseDialog pExpenseDialog) {
         this.open();
         mBookingService = pBookingService;
@@ -41,7 +47,7 @@ public class SaveExpenseDialog extends Dialog {
     private void createControls() {
         try {
             this.setWidth("30%");
-            this.setHeight("80%");
+            this.setHeight("96%");
 
             mServiceTypeCombobox = new ComboBox<>("Service Type");
             mServiceTypeCombobox.setAllowCustomValue(true);
@@ -68,12 +74,14 @@ public class SaveExpenseDialog extends Dialog {
             cashOutPrefix.setText("Rs.");
             mCashOutField.setPrefixComponent(cashOutPrefix);
 
+            mUpdateDate = new DatePicker("Expense Date");
+
             mDescriptionText = new TextArea("Description");
             mDescriptionText.setWidthFull();
             mDescriptionText.setHeight("50%");
 
             FormLayout formLayout = new FormLayout();
-            formLayout.add(mServiceTypeCombobox, mCashInField, mCashOutField);
+            formLayout.add(mServiceTypeCombobox, mCashInField, mCashOutField, mUpdateDate);
             formLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
 
             mSaveExpenseButton = new Button("Save");
@@ -114,8 +122,11 @@ public class SaveExpenseDialog extends Dialog {
         expenseEntity.setCashIn(mCashInField.getValue());
         expenseEntity.setCashOut(mCashOutField.getValue());
         expenseEntity.setDescription(mDescriptionText.getValue());
+        expenseEntity.setUpdateDate(Date.from(mUpdateDate.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        expenseEntity.setUpdateUser("1");
 
         mExpenseDialog.saveExpenseData(expenseEntity, mServiceTypeCombobox.getValue());
+        new MyNotification().success("Added the expense to the client");
     }
 
 }

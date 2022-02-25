@@ -116,8 +116,6 @@ public class ExpenseDialog extends Dialog {
 
     public void saveExpenseData(ClientExpenseEntity expenseEntity, String serviceType) throws Exception {
         expenseEntity.setClientId(mSummaryData.getClientId());
-        expenseEntity.setUpdateDate(new Date());
-        expenseEntity.setUpdateUser("1");
         mBookingService.saveExpenseData(expenseEntity, serviceType);
         setValueToGrid();
         mSummaryView.setValueToGrid(null);

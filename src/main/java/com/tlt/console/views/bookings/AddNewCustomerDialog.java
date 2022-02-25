@@ -1,25 +1,21 @@
 package com.tlt.console.views.bookings;
 
-import com.tlt.console.data.SummaryData;
-import com.tlt.console.entity.ClientCheckInCalendarEntity;
-import com.tlt.console.entity.ClientDetailEntity;
-import com.tlt.console.entity.UnitsEntity;
+import com.tlt.console.entity.*;
 import com.tlt.console.service.BookingService;
-import com.tlt.console.views.bookings.MakeABookingView;
+import com.tlt.console.views.MyNotification;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.icon.Icon;
-import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 
 
+import javax.management.Notification;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -48,7 +44,7 @@ public class AddNewCustomerDialog extends Dialog {
     private void createControls() {
         try {
             this.setWidth("50%");
-            this.setHeight("65%");
+            this.setHeight("75%");
 
             TextField nameField = new TextField("Name of Customer");
             nameField.setRequired(true);
@@ -98,13 +94,25 @@ public class AddNewCustomerDialog extends Dialog {
 
             TextField additionalRequest = new TextField("Additional Request");
 
+            NumberField mCashInField = new NumberField();
+            mCashInField.setLabel("Cash In");
+            Div cashInPrefix = new Div();
+            cashInPrefix.setText("Rs.");
+            mCashInField.setPrefixComponent(cashInPrefix);
+
+            NumberField mCashOutField = new NumberField();
+            mCashOutField.setLabel("Cash Out");
+            Div cashOutPrefix = new Div();
+            cashOutPrefix.setText("Rs.");
+            mCashOutField.setPrefixComponent(cashOutPrefix);
+
             FormLayout firstFormLayout = new FormLayout();
             firstFormLayout.add(nameField, numPeople, checkInDate);
             firstFormLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 4));
             firstFormLayout.setColspan(nameField, 2);
 
             FormLayout formLayout = new FormLayout();
-            formLayout.add(firstFormLayout, address, idProofType, idProofNumberField, mMainUnitCombo, mSubUnitCombo, additionalRequest);
+            formLayout.add(firstFormLayout, address, idProofType, idProofNumberField, mMainUnitCombo, mSubUnitCombo, mCashInField, mCashOutField, additionalRequest);
             formLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 2));
             formLayout.setColspan(firstFormLayout, 2);
             formLayout.setColspan(address, 2);
@@ -114,10 +122,10 @@ public class AddNewCustomerDialog extends Dialog {
             mSaveButton = new Button("Add Customer");
             mSaveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
             mSaveButton.addClickListener(clickEvent -> {
-                saveCustomerDetail(nameField.getValue(), numPeople.getValue(), checkInDate.getValue(), address.getValue(), idProofType.getValue(), idProofNumberField.getValue(), mSubUnitCombo.getValue(), additionalRequest.getValue());
+                saveCustomerDetail(nameField.getValue(), numPeople.getValue(), checkInDate.getValue(), address.getValue(), idProofType.getValue(), idProofNumberField.getValue(), mSubUnitCombo.getValue(), additionalRequest.getValue(), mCashInField.getValue(), mCashOutField.getValue());
             });
 
-            mCloseButton = new Button(new Icon(VaadinIcon.CLOSE_SMALL));
+            mCloseButton = new Button("Close");
             mCloseButton.addThemeVariants(ButtonVariant.LUMO_ICON);
             mCloseButton.getElement().setAttribute("aria-label", "Close");
             mCloseButton.addClickListener(clickEvent -> {
@@ -140,7 +148,7 @@ public class AddNewCustomerDialog extends Dialog {
         }
     }
 
-    private void saveCustomerDetail(String name, Double numPeople, LocalDate checkIn, String address, String idProofType, String idProofNumber, UnitsEntity units, String additionalRequest) {
+    private void saveCustomerDetail(String name, Double numPeople, LocalDate checkIn, String address, String idProofType, String idProofNumber, UnitsEntity units, String additionalRequest, Double cashIn, Double cashOut) {
         try {
             ClientDetailEntity entity = new ClientDetailEntity();
             entity.setName(name);
@@ -162,9 +170,20 @@ public class AddNewCustomerDialog extends Dialog {
             checkinEntity.setBookedDate(Date.from(checkIn.atStartOfDay(ZoneId.systemDefault()).toInstant()));
             checkinEntity.setUpdateDate(new Date());
             checkinEntity.setUpdateUser("1");
+
+            ClientExpenseEntity expenseEntity = new ClientExpenseEntity();
+            expenseEntity.setClientId(entity.getClientId());
+            expenseEntity.setCashIn(cashIn);
+            expenseEntity.setCashOut(cashOut);
+            expenseEntity.setUpdateDate(new Date());
+            expenseEntity.setUpdateUser("1");
+
             mBookingService.saveClientCheckInCalendar(checkinEntity);
+            mBookingService.saveExpenseData(expenseEntity, "ROOM RENT");
+            new MyNotification().success("Successfully Booked the client");
             this.close();
             mMakeABookingView.getCalendarEvents();
+
         } catch (Exception e) {
             e.printStackTrace();
         }

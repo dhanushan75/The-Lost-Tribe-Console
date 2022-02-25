@@ -26,7 +26,7 @@ public interface BookingService {
 
     public List<UnitsEntity> getSubUnits(Long parentUnitId) throws Exception;
 
-    public List<ClientCheckInCalendarEntity> getCalendarEventsByUnitId(Long unitId) throws Exception;
+    public List<ClientCheckInCalendarEntity> getCalendarEventsByUnitId(Long unitId, Long parentUnitId) throws Exception;
 
     public List<String> getIdProofTypeList() throws Exception;
 

@@ -14,7 +14,7 @@ public class QueryConstants {
     public static final String GET_CASHIN_CASHOUT_FOR_CLIENT_IDS =  " select  "
             + " client_id , sum(cash_in) cash_in , sum(cash_out) cash_out "
             + " from tlt_console.client_expense "
-            + " where client_id in (:pClientIdSet) ";
+            + " where client_id in (:pClientIdSet) group by client_id";
 
     public static final String GET_UNIT_AND_ROOM_FOR_UNIT_ID =  " select  "
             + " u.name room, uu.name unit "

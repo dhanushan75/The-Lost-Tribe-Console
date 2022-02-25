@@ -36,7 +36,7 @@ public class BookingServiceImpl implements BookingService {
 //            LocalDate fromDate = LocalDate.now().withDayOfMonth(1);
 //            pFromDate = Date.from(fromDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
             pClientIdList = mClientDetailDao.getClientIdList();
-        }else{
+        } else {
             pClientIdList = mClientCheckInCalendarDao.getClientIdListForCurrentMonth(pFromDate);
         }
 
@@ -61,7 +61,7 @@ public class BookingServiceImpl implements BookingService {
             summaryData.setRoom(unitData.getRoom());
             summaryData.setBookedDate(entity.getBookedDate());
 
-            if(cashInCashOutData != null) {
+            if (cashInCashOutData != null) {
                 summaryData.setTotalCashIn(cashInCashOutData.getCash_in());
                 summaryData.setTotalCashOut(cashInCashOutData.getCash_out());
             }
@@ -102,7 +102,7 @@ public class BookingServiceImpl implements BookingService {
     public void saveExpenseData(ClientExpenseEntity pExpenseEntity, String pServiceType) throws Exception {
         ServicesEntity servicesEntity = mServicesDao.findByName(pServiceType.toUpperCase());
 
-        if(servicesEntity == null){
+        if (servicesEntity == null) {
             servicesEntity = new ServicesEntity();
             servicesEntity.setName(pServiceType.toUpperCase());
             servicesEntity.setDescription(pServiceType.toUpperCase());
@@ -117,31 +117,33 @@ public class BookingServiceImpl implements BookingService {
         mClientExpenseDao.save(pExpenseEntity);
     }
 
-    public List<UnitsEntity> getParentUnits() throws Exception{
+    public List<UnitsEntity> getParentUnits() throws Exception {
         return mUnitDao.findByUnitType("UNIT");
     }
 
-    public List<UnitsEntity> getSubUnits(Long parentUnitId) throws Exception{
+    public List<UnitsEntity> getSubUnits(Long parentUnitId) throws Exception {
         return mUnitDao.findByParentUnitId(parentUnitId);
     }
 
-    public List<ClientCheckInCalendarEntity> getCalendarEventsByUnitId(Long unitId) throws Exception{
-        if(unitId != null){
+    public List<ClientCheckInCalendarEntity> getCalendarEventsByUnitId(Long unitId, Long parentUnitId) throws Exception {
+        if (unitId != null) {
             return mClientCheckInCalendarDao.findByUnitId_UnitId(unitId);
-        }else{
+        } else if (parentUnitId != null) {
+            return mClientCheckInCalendarDao.findByUnitId_ParentUnitId(parentUnitId);
+        } else {
             return mClientCheckInCalendarDao.findAll();
         }
     }
 
-    public List<String> getIdProofTypeList() throws Exception{
+    public List<String> getIdProofTypeList() throws Exception {
         return mClientDetailDao.getDistinctIdProofType();
     }
 
-    public ClientDetailEntity saveClientDetail(ClientDetailEntity entity){
-       return mClientDetailDao.saveAndFlush(entity);
+    public ClientDetailEntity saveClientDetail(ClientDetailEntity entity) {
+        return mClientDetailDao.saveAndFlush(entity);
     }
 
-    public void saveClientCheckInCalendar(ClientCheckInCalendarEntity checkinEntity) throws Exception{
+    public void saveClientCheckInCalendar(ClientCheckInCalendarEntity checkinEntity) throws Exception {
         mClientCheckInCalendarDao.save(checkinEntity);
     }
 }

@@ -21,5 +21,7 @@ public interface ClientCheckInCalendarDao extends JpaRepository<ClientCheckInCal
     @Query(value = QueryConstants.GET_CHECKIN_CHECKOUT_DATE_FOR_CLIENT_IDS, nativeQuery = true)
     public List<ClientCheckInCheckoutData> getCheckInCheckOutDateFromClientIdList(@RequestParam("pClientIdSet") Set<Long> pClientIdSet);
 
-   public List<ClientCheckInCalendarEntity> findByUnitId_UnitId(Long unitId);
+    public List<ClientCheckInCalendarEntity> findByUnitId_UnitId(Long unitId);
+
+    public List<ClientCheckInCalendarEntity> findByUnitId_ParentUnitId(Long parentUnitId);
 }
